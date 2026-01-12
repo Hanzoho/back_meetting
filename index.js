@@ -55,19 +55,19 @@ app.use(cors({
 // Global Error Handler (จัดการ error ครั้งเดียว)
 app.onError(({ code, error, set }) => {
   console.error('API Error:', error)
-  
+
   if (code === 'NOT_FOUND') {
     set.status = 404
     return { error: 'ไม่พบ endpoint ที่ต้องการ' }
   }
-  
+
   set.status = 500
   return { error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }
 })
 
 // Routes พื้นฐาน
 app.get('/', () => {
-  return { 
+  return {
     message: 'ระบบจองห้องประชุม API',
     status: 'running',
     timestamp: new Date().toISOString()
@@ -78,12 +78,12 @@ app.get('/', () => {
 app.get('/health', async () => {
   let databaseStatus = 'disconnected'
   let databaseInfo = null
-  
+
   try {
     // ทดสอบ query เบาๆ
     await prisma.$queryRaw`SELECT 1`
     databaseStatus = 'connected'
-    
+
     // ลองนับข้อมูลเบาๆ
     const roomCount = await prisma.meeting_room.count()
     databaseInfo = { tables_accessible: true, room_count: roomCount }
@@ -91,8 +91,8 @@ app.get('/health', async () => {
     databaseStatus = 'error'
     databaseInfo = { error: error.message }
   }
-  
-  return { 
+
+  return {
     status: 'healthy',
     database: databaseStatus,
     database_info: databaseInfo,
@@ -110,7 +110,7 @@ app.group('/api', app => app
       const roomCount = await prisma.meeting_room.count()
       const reservationCount = await prisma.reservation.count()
       const userCount = await prisma.users.count()
-      
+
       return {
         success: true,
         message: 'Database ทำงานได้แล้ว!',
@@ -155,12 +155,12 @@ async function startServer() {
     console.log('🔍 กำลังทดสอบการเชื่อมต่อฐานข้อมูล...')
     await prisma.$connect()
     console.log('✅ เชื่อมต่อฐานข้อมูลสำเร็จ')
-    
+
   } catch (error) {
     console.error('❌ ไม่สามารถเชื่อมต่อฐานข้อมูล:', error.message)
     console.log('📝 จะเริ่มเซิร์ฟเวอร์โดยไม่มีฐานข้อมูล (สำหรับ debug)')
   }
-  
+
   console.log(`🚀 Server เริ่มทำงานที่ port ${PORT}`)
   console.log(`📚 API Docs: http://localhost:${PORT}`)
   console.log(`🔍 Health Check: http://localhost:${PORT}/health`)
